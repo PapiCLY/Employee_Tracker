@@ -39,7 +39,7 @@ const start = () => {
         } else if (answer.start === 'Add Department') {
             addDepartment();
         } else if (answer.start === 'Add Role') {
-            addRole();
+            addJob();
         } else if (answer.start === 'Add Employee') {
             addEmployee();
         } else if (answer.start === 'Update Employee Role') {
