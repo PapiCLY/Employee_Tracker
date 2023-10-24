@@ -1,71 +1,137 @@
-require = require('esm')(module);
-
-const express = require('express');
-const mysql = require('mysql2');
 const inquirer = require('inquirer');
+const mysql = require('mysql2');
+const connection = require('./db/connection');
 
-const app = express();
-const PORT = process.env.PORT || 3001;
-
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'rootroot',
-  database: 'employee_tracker_db',
+connection.connect((err) => {
+    if (err) {
+        console.log(err);
+    } else {
+        console.log('connected to database');
+        start();
+    }
 });
 
-function startApp() {
-  prompts(); 
-}
-
-function prompts() {
-  inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'action',
-        message: 'What would you like to do?',
-        choices: [
-          'View all departments',
-          'View all roles',
-          'View all employees',
-          'Add a department',
-          'Add a role',
-          'Add an employee',
-          'Update an employee role',
-        ],
-      },
+const start = () => {
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'start',
+            message: 'What would you like to do?',
+            choices: [
+                'View All Departments',
+                'View All Roles',
+                'View All Employees',
+                'Add Department',
+                'Add Role',
+                'Add Employee',
+                'Update Employee Role',
+                'Exit'
+            ]
+        }
     ])
-    .then((answers) => {
-      switch (answers.action) {
-        case 'View all departments':
-          viewDepartments();
-          break;
-        case 'View all roles':
-          viewRoles();
-          break;
-        case 'View all employees':
-          viewEmployees();
-          break;
-        case 'Add a department':
-          addDepartment();
-          break;
-        case 'Add a role':
-          addRole();
-          break;
-        case 'Add an employee':
-          addEmployee();
-          break;
-        case 'Update an employee role':
-          updateEmployeeRole();
-          break;
-      }
+    .then((answer) => {
+        if (answer.start === 'View All Departments') {
+            viewDepartments();
+        } else if (answer.start === 'View All Roles') {
+            viewRoles();
+        } else if (answer.start === 'View All Employees') {
+            viewEmployees();
+        } else if (answer.start === 'Add Department') {
+            addDepartment();
+        } else if (answer.start === 'Add Role') {
+            addRole();
+        } else if (answer.start === 'Add Employee') {
+            addEmployee();
+        } else if (answer.start === 'Update Employee Role') {
+            updateEmployeeRole();
+        } else if (answer.start === 'Exit') {
+            connection.end();
+        }
+    })
+    .catch((err) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log('connected to database');
+            start();
+        }
+    });
+};
+
+// Define  viewDepartments, viewRoles, addDepartment, addRole, addEmployee, and updateEmployeeRole
+const newDepartment = ()=> {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'department',
+            message: 'What is the name of the new department?'
+        }
+    ])
+    .then((answer) => {
+        connection.query('INSERT INTO department SET ?', {name: answer.department}, (err, res) => {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log('Department added');
+                start();
+            }
+        });
     });
 }
 
-// Rest of your code remains the same
+const viewDepartments = () => {
+    connection.query('SELECT * FROM department', (err, res) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        
+        const list = res.map(({ id, name }) => ({ name, value: id }));
+        console.log(list);
+    });
+};
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-  startApp();
-});
+const addJob = () => {
+    connection.query('SELECT * FROM role', (err, res) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+
+        const departmentChoices = res.map(({ id, title }) => ({ name: title, value: id });
+
+        inquirer.prompt([
+            {
+                type: 'input',
+                name: 'job_name',
+                message: 'What is the name of the new role?'
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: 'What is the salary of the new role?'
+            },
+            {
+                type: 'list',
+                name: 'department',
+                message: 'What department is the new role in?',
+                choices: departmentChoices
+            }
+        ])
+        .then((answers) => {
+            console.log(answers);
+            connection.query(`INSERT INTO role(title, salary, department_id) VALUES('${answers.job_name}', ${answers.salary}, ${answers.department})`, 
+            (err, res) => { 
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log(res);
+                }
+                start();
+            });
+        });
+    };
+};
+
+    // You may want to call addJob somewhere in your code to start the role creation process.
+    
