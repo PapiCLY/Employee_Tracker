@@ -89,7 +89,8 @@ const viewDepartments = () => {
         }
         
         const list = res.map(({ id, name }) => ({ name, value: id }));
-        console.log(list);
+        console.table(list);
+        start();
     });
 };
 
