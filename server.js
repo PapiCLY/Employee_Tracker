@@ -80,10 +80,12 @@ const newDepartment = ()=> {
 }
 
 const viewDepartments = () => {
-    connection.query('SELECT * FROM department', (err, res) => {
+    connection.query('SELECT * FROM department', 
+    function (err, res) {
         if (err) {
             console.log(err);
-            return;
+            console.table(res)
+            start();
         }
         
         const list = res.map(({ id, name }) => ({ name, value: id }));
