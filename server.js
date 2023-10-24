@@ -95,7 +95,7 @@ const viewDepartments = () => {
 };
 
 const addJob = () => {
-    connection.query('SELECT * FROM role', (err, res) => {
+    connection.query('SELECT * FROM department', (err, res) => {
         if (err) {
             console.log(err);
             return;
