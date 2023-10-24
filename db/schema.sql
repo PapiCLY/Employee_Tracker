@@ -1,6 +1,6 @@
-dropdb if exists exmployee_tracker_db;
-create db exmployee_tracker_db;
-USE exmployee_tracker_db;
+drop db if exists employee_tracker_db;
+create db employee_tracker_db;
+USE employee_tracker_db;
 
 create TABLE department (
     id INT AUTO_INCREMENT PRIMARY KEY,
