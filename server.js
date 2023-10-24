@@ -15,7 +15,7 @@ const db = mysql.createConnection({
 });
 
 function startApp() {
-  prompts(); // Remove the 'inquirer' parameter
+  prompts(); 
 }
 
 function prompts() {
