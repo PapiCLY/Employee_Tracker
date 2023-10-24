@@ -98,7 +98,7 @@ const addJob = () => {
             return;
         }
 
-        const departmentChoices = res.map(({ id, title }) => ({ name: title, value: id });
+        const departmentChoices = res.map(({ id, title }) => ({ name: title, value: id }));
 
         inquirer.prompt([
             {
@@ -120,7 +120,7 @@ const addJob = () => {
         ])
         .then((answers) => {
             console.log(answers);
-            connection.query(`INSERT INTO role(title, salary, department_id) VALUES('${answers.job_name}', ${answers.salary}, ${answers.department})`, 
+            connection.query(`INSERT INTO role(title, salary, department_id) VALUES('${answers.job_name}', '${answers.salary}', '${answers.department}')`, 
             (err, res) => { 
                 if (err) {
                     console.log(err);
@@ -130,8 +130,146 @@ const addJob = () => {
                 start();
             });
         });
-    };
+    });
 };
 
-    // You may want to call addJob somewhere in your code to start the role creation process.
-    
+const viewRoles = () => {
+    connection.query(`SELECT role.id, role.title, role.salary, department.name AS department FROM role LEFT JOIN department ON role.department_id = department.id`, 
+    function (err, res){
+        console.table(res);
+        start();
+    });
+};
+ 
+const addEmployee = () => {
+    connection.query('SELECT * FROM role', (err, roleResults) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+
+        const roleChoices = roleResults.map(({ id, title }) => ({ name: title, value: id }));
+
+        connection.query('SELECT * FROM employee', (err, employeeResults) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            const managerChoices = employeeResults.map(({ id, first_name, last_name }) => ({
+                name: `${first_name} ${last_name}`,
+                value: id
+            }));
+
+            inquirer.prompt([
+                {
+                    type: 'input',
+                    name: 'first_name',
+                    message: 'What is the first name of the new employee?'
+                },
+                {
+                    type: 'input',
+                    name: 'last_name',
+                    message: 'What is the last name of the new employee?'
+                },
+                {
+                    type: 'list',
+                    name: 'role',
+                    message: 'What is the role of the new employee?',
+                    choices: roleChoices
+                },
+                {
+                    type: 'list',
+                    name: 'manager',
+                    message: 'Who is the manager of the new employee?',
+                    choices: managerChoices
+                }
+            ])
+            .then((answers) => {
+                connection.query(
+                    'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)',
+                    [answers.first_name, answers.last_name, answers.role, answers.manager],
+                    (err, res) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log(res);
+                        }
+                        start();
+                    }
+                );
+            });
+        });
+    });
+};
+
+
+const viewEmployees = () => {
+    connection.query(
+        `SELECT employee.id, employee.first_name, employee.last_name, role.title, 
+        department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee 
+        LEFT JOIN role ON employee.role_id = role.id 
+        LEFT JOIN department ON role.department_id = department.id 
+        LEFT JOIN employee manager ON manager.id = employee.manager_id`, 
+        function (err, res) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.table(res);
+                start();
+            }
+        }
+    );
+};
+
+const updateEmployeeRole = () => {
+    connection.query('SELECT * FROM role', (err, res) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+
+        const roleChoices = res.map(({ id, title }) => ({ name: title, value: id }));
+
+        connection.query('SELECT * FROM employee', (err, employeeResults) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            const employeeChoices = employeeResults.map(({ id, first_name, last_name }) => ({
+                name: `${first_name} ${last_name}`,
+                value: id
+            }));
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'employee',
+                    message: 'Which employee would you like to update?',
+                    choices: employeeChoices
+                },
+                {
+                    type: 'list',
+                    name: 'role',
+                    message: 'What is the new role of the employee?',
+                    choices: roleChoices
+                }
+            ])
+            .then((answers) => {
+                connection.query(
+                    `UPDATE employee SET role_id = ? WHERE id = ?`,
+                    [answers.role, answers.employee],
+                    (err, res) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log(res);
+                        }
+                        start();
+                    }
+                );
+            });
+        });
+    });
+};
