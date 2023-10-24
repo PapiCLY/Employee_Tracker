@@ -15,10 +15,10 @@ const db = mysql.createConnection({
 });
 
 function startApp() {
-  prompts(inquirer);
+  prompts(); // Remove the 'inquirer' parameter
 }
 
-function prompts(inquirer) {
+function prompts() {
   inquirer
     .prompt([
       {
@@ -63,43 +63,9 @@ function prompts(inquirer) {
     });
 }
 
-function viewDepartments() {
-  db.query('SELECT * FROM departments', function (err, results) {
-    console.log(results);
-  });
-}
-
-function viewRoles() {
-  db.query('SELECT * FROM roles', function (err, results) {
-    console.log(results);
-  });
-}
-
-function viewEmployees() {
-  db.query('SELECT * FROM employees', function (err, results) {
-    console.log(results);
-  });
-}
-
-function addDepartment() {
-  inquirer
-    .prompt([
-      {
-        type: 'input',
-        name: 'department',
-        message: 'What is the name of the department you would like to add?',
-      },
-    ])
-    .then((answers) => {
-      db.query(`INSERT INTO departments (name) VALUES ('${answers.department}')`, function (err, results) {
-        console.log(results);
-      });
-    });
-}
-
-
+// Rest of your code remains the same
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
-  startApp(); 
+  startApp();
 });
