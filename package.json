@@ -1,5 +1,5 @@
 {
-  "name": "employee_tracker",
+  "name": "employee_tracker_db",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
