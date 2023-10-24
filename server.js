@@ -37,7 +37,7 @@ const start = () => {
         } else if (answer.start === 'View All Employees') {
             viewEmployees();
         } else if (answer.start === 'Add Department') {
-            addDepartment();
+            newDepartment();
         } else if (answer.start === 'Add Role') {
             addJob();
         } else if (answer.start === 'Add Employee') {
@@ -156,10 +156,10 @@ const addEmployee = () => {
                 return;
             }
 
-            const managerChoices = employeeResults.map(({ id, first_name, last_name }) => ({
-                name: `${first_name} ${last_name}`,
-                value: id
-            }));
+            // const managerChoices = employeeResults.map(({ id, first_name, last_name }) => ({
+            //     name: `${first_name} ${last_name}`,
+            //     value: id
+            // }));
 
             inquirer.prompt([
                 {
@@ -177,18 +177,18 @@ const addEmployee = () => {
                     name: 'role',
                     message: 'What is the role of the new employee?',
                     choices: roleChoices
-                },
-                {
-                    type: 'list',
-                    name: 'manager',
-                    message: 'Who is the manager of the new employee?',
-                    choices: managerChoices
                 }
+                // {
+                //     type: 'list',
+                //     name: 'manager',
+                //     message: 'Who is the manager of the new employee?',
+                //     choices: managerChoices
+                // }
             ])
             .then((answers) => {
                 connection.query(
-                    'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)',
-                    [answers.first_name, answers.last_name, answers.role, answers.manager],
+                    'INSERT INTO employee (first_name, last_name, role_id) VALUES (?, ?, ?)', //manager_id after role id
+                    [answers.first_name, answers.last_name, answers.role /*answers.manager*/],
                     (err, res) => {
                         if (err) {
                             console.log(err);
